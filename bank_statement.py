@@ -1,4 +1,5 @@
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List
@@ -18,6 +19,15 @@ class EntryType(Enum):
     DEBIT = "Lastschrift"
 
 
+@dataclass
+class StatementsEntry:
+    amount: float
+    date: date
+    target: str
+    text: str
+    kind: EntryType
+
+
 def parse(
     path: str | Path,
     remove_words: List[str],
@@ -35,7 +45,8 @@ def parse(
 
     lines = [_parse_line(line) for line in lines]
     lines = _combine_lines(lines)
-    return _cleanup_text(lines)
+    _cleanup_text(lines)
+    return [_to_statements_entry(line) for line in lines]
 
 
 def _get_cleaned_lines(
@@ -114,3 +125,13 @@ def _combine_lines(lines: List[Dict]) -> List[Dict]:
 def _cleanup_text(lines: List[Dict]):
     for line in lines:
         line[ENTRY_TEXT] = " ".join(line[ENTRY_TEXT])
+
+
+def _to_statements_entry(line: Dict) -> StatementsEntry:
+    return StatementsEntry(
+        amount=line[ENTRY_AMOUNT],
+        date=line[ENTRY_DATE],
+        target=line[ENTRY_TARGET],
+        text=line[ENTRY_TEXT],
+        kind=line[ENTRY_TYPE],
+    )
