@@ -9,3 +9,4 @@ parse:
     <credit>: Credit
     <transfer>: Transfer
     <debit>: Debit
+statement_dir: <dir>
