@@ -82,6 +82,20 @@ class Statement:
     def profit(self) -> float:
         return self.credit + self.debit
 
+    @property
+    def first_date(self) -> date:
+        return min(self.entries, key=lambda x: x.date).date
+
+    @property
+    def last_date(self) -> date:
+        return max(self.entries, key=lambda x: x.date).date
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def __str__(self) -> str:
+        return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
+
 
 def _get_cleaned_lines(
     text: str, remove_words: List[str], remove_lines_with: List[str]
