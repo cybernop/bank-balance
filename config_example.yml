@@ -1,0 +1,11 @@
+parse:
+  remove_words: 
+    - <word>
+  remove_lines_with:
+    - <word>
+    - <sentence>
+  stop_word: <word>
+  type_map:
+    <credit>: Credit
+    <transfer>: Transfer
+    <debit>: Debit
