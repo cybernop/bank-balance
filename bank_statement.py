@@ -14,9 +14,9 @@ ENTRY_TYPE = "type"
 
 
 class EntryType(Enum):
-    CREDIT = "Gutschrift"
-    TRANSFER = "Ueberweisung"
-    DEBIT = "Lastschrift"
+    CREDIT = "Credit"
+    TRANSFER = "Transfer"
+    DEBIT = "Debit"
 
 
 @dataclass
@@ -29,8 +29,12 @@ class StatementsEntry:
 
 
 class Statement:
-    def __init__(self, entries: List[StatementsEntry] = list()) -> None:
+    def __init__(
+        self, entries: List[StatementsEntry] = list(), file: str = None, *args, **kwargs
+    ) -> None:
         self.entries: List[StatementsEntry] = entries
+        if file:
+            self.parse(file, *args, **kwargs)
 
     def parse(
         self,
@@ -38,6 +42,7 @@ class Statement:
         remove_words: List[str],
         remove_lines_with: List[str],
         stop_word: str,
+        type_map: Dict[str, str],
     ):
         file = Path(path)
         pdf = PdfReader(file)
@@ -48,7 +53,7 @@ class Statement:
             lines += _get_cleaned_lines(text, remove_words, remove_lines_with)
         lines = _remove_tailing_information(lines, stop_word)
 
-        lines = [_parse_line(line) for line in lines]
+        lines = [_parse_line(line, type_map) for line in lines]
         lines = _combine_lines(lines)
         _cleanup_text(lines)
         self.entries = [_to_statements_entry(line) for line in lines]
@@ -100,7 +105,7 @@ def _remove_tailing_information(
     return lines[: lines.index(stop_word)]
 
 
-def _parse_line(line: str):
+def _parse_line(line: str, type_map: Dict[str, str]):
     parts = line.split()
 
     date_ = None
@@ -112,8 +117,8 @@ def _parse_line(line: str):
         parts = parts[1:] if len(parts) > 1 else []
 
     type_ = None
-    if parts and parts[0] in [type_.value for type_ in EntryType]:
-        type_ = EntryType(parts[0])
+    if parts and parts[0] in type_map:
+        type_ = EntryType(type_map[parts[0]])
         parts = parts[1:] if len(parts) > 1 else []
 
     amount = None
