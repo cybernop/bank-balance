@@ -28,25 +28,54 @@ class StatementsEntry:
     kind: EntryType
 
 
-def parse(
-    path: str | Path,
-    remove_words: List[str],
-    remove_lines_with: List[str],
-    stop_word: str,
-):
-    file = Path(path)
-    pdf = PdfReader(file)
+class Statement:
+    def __init__(self, entries: List[StatementsEntry] = list()) -> None:
+        self.entries: List[StatementsEntry] = entries
 
-    lines = []
-    for page in pdf.pages:
-        text = page.extract_text()
-        lines += _get_cleaned_lines(text, remove_words, remove_lines_with)
-    lines = _remove_tailing_information(lines, stop_word)
+    def parse(
+        self,
+        path: str | Path,
+        remove_words: List[str],
+        remove_lines_with: List[str],
+        stop_word: str,
+    ):
+        file = Path(path)
+        pdf = PdfReader(file)
 
-    lines = [_parse_line(line) for line in lines]
-    lines = _combine_lines(lines)
-    _cleanup_text(lines)
-    return [_to_statements_entry(line) for line in lines]
+        lines = []
+        for page in pdf.pages:
+            text = page.extract_text()
+            lines += _get_cleaned_lines(text, remove_words, remove_lines_with)
+        lines = _remove_tailing_information(lines, stop_word)
+
+        lines = [_parse_line(line) for line in lines]
+        lines = _combine_lines(lines)
+        _cleanup_text(lines)
+        self.entries = [_to_statements_entry(line) for line in lines]
+
+    @property
+    def debits(self) -> List[StatementsEntry]:
+        return [
+            entry
+            for entry in self.entries
+            if entry.kind == EntryType.TRANSFER or entry.kind == EntryType.DEBIT
+        ]
+
+    @property
+    def debit(self) -> float:
+        return sum_entries(self.debits)
+
+    @property
+    def credits(self) -> List[StatementsEntry]:
+        return [entry for entry in self.entries if entry.kind == EntryType.CREDIT]
+
+    @property
+    def credit(self) -> float:
+        return sum_entries(self.credits)
+
+    @property
+    def profit(self) -> float:
+        return self.credit + self.debit
 
 
 def _get_cleaned_lines(
@@ -127,7 +156,7 @@ def _cleanup_text(lines: List[Dict]):
         line[ENTRY_TEXT] = " ".join(line[ENTRY_TEXT])
 
 
-def _to_statements_entry(line: Dict) -> StatementsEntry:
+def _to_statements_entry(line: Dict):
     return StatementsEntry(
         amount=line[ENTRY_AMOUNT],
         date=line[ENTRY_DATE],
@@ -135,3 +164,10 @@ def _to_statements_entry(line: Dict) -> StatementsEntry:
         text=line[ENTRY_TEXT],
         kind=line[ENTRY_TYPE],
     )
+
+
+def sum_entries(entries: List[StatementsEntry]) -> float:
+    result = 0.0
+    for entry in entries:
+        result += entry.amount
+    return result
