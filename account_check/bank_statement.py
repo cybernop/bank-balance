@@ -54,10 +54,15 @@ class Statement:
         lines = _combine_lines(lines)
         _cleanup_text(lines)
         self.entries = [_to_statements_entry(line) for line in lines]
+        self.set_categories()
+
+    def set_categories(self):
+        for entry in self.entries:
+            entry.category = self.get_category(entry)
 
     @property
     def categories(self) -> Dict[str, Category]:
-        return get_categories(self.entries)
+        return Statement.get_categories(self.entries)
 
     @property
     def debits(self) -> List[StatementEntry]:
@@ -73,7 +78,7 @@ class Statement:
 
     @property
     def debit_categories(self) -> Dict[str, Category]:
-        return self.get_categories(self.debits)
+        return Statement.get_categories(self.debits)
 
     @property
     def credits(self) -> List[StatementEntry]:
@@ -85,7 +90,7 @@ class Statement:
 
     @property
     def credit_categories(self) -> Dict[str, Category]:
-        return self.get_categories(self.credits)
+        return Statement.get_categories(self.credits)
 
     @property
     def profit(self) -> float:
@@ -105,17 +110,25 @@ class Statement:
     def __str__(self) -> str:
         return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
 
-    def get_categories(self, entries: List[StatementEntry]) -> Dict[str, Category]:
+    @staticmethod
+    def get_categories(entries: List[StatementEntry]) -> Dict[str, Category]:
         categories = {}
 
-        for category, category_entries in self.category_definitions.items():
-            list_ = [entry for entry in entries if entry.target in category_entries]
-            categories[category] = Category(list_)
-            entries = list(set(entries) - set(list_))
-
-        categories["Other"] = Category(entries)
+        for entry in entries:
+            category = entry.category
+            if category is None:
+                category = "Other"
+            if category not in categories:
+                categories[category] = Category()
+            categories[category].append(entry)
 
         return categories
+
+    def get_category(self, entry: StatementEntry) -> str:
+        for category, category_entries in self.category_definitions.items():
+            if entry.target in category_entries:
+                return category
+        return None
 
 
 def _get_cleaned_lines(
@@ -203,4 +216,5 @@ def _to_statements_entry(line: Dict):
         target=line[ENTRY_TARGET],
         text=line[ENTRY_TEXT],
         kind=line[ENTRY_TYPE],
+        category=None,
     )

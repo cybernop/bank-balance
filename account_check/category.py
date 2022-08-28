@@ -5,8 +5,11 @@ from account_check.statement_entry import StatementEntry
 
 
 class Category:
-    def __init__(self, entries: List[StatementEntry] = list()) -> None:
-        self.entries = entries
+    def __init__(self, entries: List[StatementEntry] = None) -> None:
+        self.entries = entries if entries else list()
+
+    def append(self, value: StatementEntry) -> None:
+        self.entries.append(value)
 
     @property
     def total(self) -> float:

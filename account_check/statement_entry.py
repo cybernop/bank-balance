@@ -16,6 +16,7 @@ class StatementEntry:
     target: str
     text: str
     kind: EntryType
+    category: str
 
     def __hash__(self) -> int:
         return hash(self.amount) + hash(self.date) + hash(self.kind)
