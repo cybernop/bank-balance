@@ -20,3 +20,7 @@ class StatementEntry:
 
     def __hash__(self) -> int:
         return hash(self.amount) + hash(self.date) + hash(self.kind)
+
+    @property
+    def month(self) -> date:
+        return date(day=1, month=self.date.month, year=self.date.year)
