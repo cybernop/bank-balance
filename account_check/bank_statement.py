@@ -6,7 +6,7 @@ from PyPDF2 import PdfReader
 
 from account_check.category import Category
 from account_check.helpers import sum_entries
-from account_check.statement_entry import EntryType, StatementsEntry
+from account_check.statement_entry import EntryType, StatementEntry
 
 ENTRY_DATE = "date"
 ENTRY_AMOUNT = "amount"
@@ -17,9 +17,9 @@ ENTRY_TYPE = "type"
 
 class Statement:
     def __init__(
-        self, entries: List[StatementsEntry] = list(), file: str = None, *args, **kwargs
+        self, entries: List[StatementEntry] = list(), file: str = None, *args, **kwargs
     ) -> None:
-        self.entries: List[StatementsEntry] = entries
+        self.entries: List[StatementEntry] = entries
         if file:
             self.parse(file, *args, **kwargs)
 
@@ -50,7 +50,7 @@ class Statement:
         return get_categories(self.entries)
 
     @property
-    def debits(self) -> List[StatementsEntry]:
+    def debits(self) -> List[StatementEntry]:
         return [
             entry
             for entry in self.entries
@@ -66,7 +66,7 @@ class Statement:
         return get_categories(self.debits)
 
     @property
-    def credits(self) -> List[StatementsEntry]:
+    def credits(self) -> List[StatementEntry]:
         return [entry for entry in self.entries if entry.kind == EntryType.CREDIT]
 
     @property
@@ -96,7 +96,7 @@ class Statement:
         return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
 
 
-def get_categories(entries: List[StatementsEntry]) -> Dict[str, Category]:
+def get_categories(entries: List[StatementEntry]) -> Dict[str, Category]:
     categories = {}
 
     categories["Other"] = Category(entries)
@@ -183,7 +183,7 @@ def _cleanup_text(lines: List[Dict]):
 
 
 def _to_statements_entry(line: Dict):
-    return StatementsEntry(
+    return StatementEntry(
         amount=line[ENTRY_AMOUNT],
         date=line[ENTRY_DATE],
         target=line[ENTRY_TARGET],

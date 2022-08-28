@@ -10,7 +10,7 @@ class EntryType(Enum):
 
 
 @dataclass
-class StatementsEntry:
+class StatementEntry:
     amount: float
     date: date
     target: str

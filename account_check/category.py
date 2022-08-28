@@ -1,11 +1,11 @@
 from typing import List
 
 from account_check.helpers import sum_entries
-from account_check.statement_entry import StatementsEntry
+from account_check.statement_entry import StatementEntry
 
 
 class Category:
-    def __init__(self, entries: List[StatementsEntry] = list()) -> None:
+    def __init__(self, entries: List[StatementEntry] = list()) -> None:
         self.entries = entries
 
     @property
