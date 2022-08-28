@@ -11,4 +11,10 @@ class Account:
 
     def read_statements(self, dir: str):
         for file in Path(dir).glob("*.pdf"):
-            self.statements.append(Statement(file=file, **self.config["parse"]))
+            self.statements.append(
+                Statement(
+                    file=file,
+                    categories=self.config["categories"],
+                    parse=self.config["parse"],
+                )
+            )

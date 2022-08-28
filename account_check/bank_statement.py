@@ -17,11 +17,21 @@ ENTRY_TYPE = "type"
 
 class Statement:
     def __init__(
-        self, entries: List[StatementEntry] = list(), file: str = None, *args, **kwargs
+        self,
+        entries: List[StatementEntry] = list(),
+        file: str = None,
+        categories: Dict[str, List[str]] = dict(),
+        parse: Dict = None,
+        *args,
+        **kwargs,
     ) -> None:
         self.entries: List[StatementEntry] = entries
+        self.category_definitions = categories
         if file:
-            self.parse(file, *args, **kwargs)
+            if parse:
+                self.parse(file, **parse)
+            else:
+                self.parse(file, *args, **kwargs)
 
     def parse(
         self,
@@ -63,7 +73,7 @@ class Statement:
 
     @property
     def debit_categories(self) -> Dict[str, Category]:
-        return get_categories(self.debits)
+        return self.get_categories(self.debits)
 
     @property
     def credits(self) -> List[StatementEntry]:
@@ -75,7 +85,7 @@ class Statement:
 
     @property
     def credit_categories(self) -> Dict[str, Category]:
-        return get_categories(self.credits)
+        return self.get_categories(self.credits)
 
     @property
     def profit(self) -> float:
@@ -95,13 +105,17 @@ class Statement:
     def __str__(self) -> str:
         return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
 
+    def get_categories(self, entries: List[StatementEntry]) -> Dict[str, Category]:
+        categories = {}
 
-def get_categories(entries: List[StatementEntry]) -> Dict[str, Category]:
-    categories = {}
+        for category, category_entries in self.category_definitions.items():
+            list_ = [entry for entry in entries if entry.target in category_entries]
+            categories[category] = Category(list_)
+            entries = list(set(entries) - set(list_))
 
-    categories["Other"] = Category(entries)
+        categories["Other"] = Category(entries)
 
-    return categories
+        return categories
 
 
 def _get_cleaned_lines(
