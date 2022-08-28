@@ -1,31 +1,16 @@
-from dataclasses import dataclass
 from datetime import date, datetime
-from enum import Enum
 from pathlib import Path
 from typing import Dict, List
 
 from PyPDF2 import PdfReader
+
+from statement_entry import EntryType, StatementsEntry
 
 ENTRY_DATE = "date"
 ENTRY_AMOUNT = "amount"
 ENTRY_TEXT = "text"
 ENTRY_TARGET = "target"
 ENTRY_TYPE = "type"
-
-
-class EntryType(Enum):
-    CREDIT = "Credit"
-    TRANSFER = "Transfer"
-    DEBIT = "Debit"
-
-
-@dataclass
-class StatementsEntry:
-    amount: float
-    date: date
-    target: str
-    text: str
-    kind: EntryType
 
 
 class Statement:
