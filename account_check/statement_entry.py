@@ -3,6 +3,8 @@ from datetime import date
 from enum import Enum
 from typing import Dict
 
+import pandas as pd
+
 
 class EntryType(Enum):
     CREDIT = "Credit"
@@ -28,3 +30,6 @@ class StatementEntry:
 
     def dict(self) -> Dict[str, str]:
         return {"month": self.month, **asdict(self)}
+
+    def dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame([self.dict()])

@@ -4,6 +4,7 @@ from typing import List
 import pandas as pd
 
 from account_check.bank_statement import Statement
+from account_check.sub_type import SubType
 
 
 class Account:
@@ -23,3 +24,17 @@ class Account:
 
     def dataframe(self) -> pd.DataFrame:
         return pd.concat([statement.dataframe() for statement in self.statements])
+
+    @property
+    def credit(self):
+        list_ = []
+        for entry in self.statements:
+            list_ += entry.credit.value
+        return SubType(list_)
+
+    @property
+    def debit(self):
+        list_ = []
+        for entry in self.statements:
+            list_ += entry.debit.value
+        return SubType(list_)

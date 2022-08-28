@@ -6,8 +6,8 @@ import pandas as pd
 from PyPDF2 import PdfReader
 
 from account_check.category import Category
-from account_check.helpers import sum_entries
 from account_check.statement_entry import EntryType, StatementEntry
+from account_check.sub_type import SubType
 
 ENTRY_DATE = "date"
 ENTRY_AMOUNT = "amount"
@@ -74,24 +74,16 @@ class Statement:
         ]
 
     @property
-    def debit(self) -> float:
-        return sum_entries(self.debits)
-
-    @property
-    def debit_categories(self) -> Dict[str, Category]:
-        return Statement.get_categories(self.debits)
+    def debit(self):
+        return SubType(self.debits)
 
     @property
     def credits(self) -> List[StatementEntry]:
         return [entry for entry in self.entries if entry.kind == EntryType.CREDIT]
 
     @property
-    def credit(self) -> float:
-        return sum_entries(self.credits)
-
-    @property
-    def credit_categories(self) -> Dict[str, Category]:
-        return Statement.get_categories(self.credits)
+    def credit(self):
+        return SubType(self.credits)
 
     @property
     def profit(self) -> float:
@@ -111,25 +103,11 @@ class Statement:
     def __str__(self) -> str:
         return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
 
-    @staticmethod
-    def get_categories(entries: List[StatementEntry]) -> Dict[str, Category]:
-        categories = {}
-
-        for entry in entries:
-            category = entry.category
-            if category is None:
-                category = "Other"
-            if category not in categories:
-                categories[category] = Category()
-            categories[category].append(entry)
-
-        return categories
-
     def get_category(self, entry: StatementEntry) -> str:
         for category, category_entries in self.category_definitions.items():
             if entry.target in category_entries:
                 return category
-        return None
+        return "Sonstige"
 
     def dataframe(self) -> pd.DataFrame:
         return pd.DataFrame([entry.dict() for entry in self.entries])
