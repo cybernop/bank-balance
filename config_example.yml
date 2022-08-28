@@ -1,5 +1,5 @@
 parse:
-  remove_words: 
+  remove_words:
     - <word>
   remove_lines_with:
     - <word>
@@ -10,3 +10,7 @@ parse:
     <transfer>: Transfer
     <debit>: Debit
 statement_dir: <dir>
+categories:
+  <category1>:
+    - <target1>
+    - <target2>
