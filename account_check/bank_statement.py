@@ -4,6 +4,8 @@ from typing import Dict, List
 
 from PyPDF2 import PdfReader
 
+from account_check.category import Category
+from account_check.helpers import sum_entries
 from account_check.statement_entry import EntryType, StatementsEntry
 
 ENTRY_DATE = "date"
@@ -44,6 +46,10 @@ class Statement:
         self.entries = [_to_statements_entry(line) for line in lines]
 
     @property
+    def categories(self) -> Dict[str, Category]:
+        return get_categories(self.entries)
+
+    @property
     def debits(self) -> List[StatementsEntry]:
         return [
             entry
@@ -56,12 +62,20 @@ class Statement:
         return sum_entries(self.debits)
 
     @property
+    def debit_categories(self) -> Dict[str, Category]:
+        return get_categories(self.debits)
+
+    @property
     def credits(self) -> List[StatementsEntry]:
         return [entry for entry in self.entries if entry.kind == EntryType.CREDIT]
 
     @property
     def credit(self) -> float:
         return sum_entries(self.credits)
+
+    @property
+    def credit_categories(self) -> Dict[str, Category]:
+        return get_categories(self.credits)
 
     @property
     def profit(self) -> float:
@@ -80,6 +94,14 @@ class Statement:
 
     def __str__(self) -> str:
         return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
+
+
+def get_categories(entries: List[StatementsEntry]) -> Dict[str, Category]:
+    categories = {}
+
+    categories["Other"] = Category(entries)
+
+    return categories
 
 
 def _get_cleaned_lines(
@@ -168,10 +190,3 @@ def _to_statements_entry(line: Dict):
         text=line[ENTRY_TEXT],
         kind=line[ENTRY_TYPE],
     )
-
-
-def sum_entries(entries: List[StatementsEntry]) -> float:
-    result = 0.0
-    for entry in entries:
-        result += entry.amount
-    return result
