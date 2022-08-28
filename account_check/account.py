@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List
 
-from bank_statement import Statement
+from account_check.bank_statement import Statement
 
 
 class Account:

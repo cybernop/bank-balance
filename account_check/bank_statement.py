@@ -4,7 +4,7 @@ from typing import Dict, List
 
 from PyPDF2 import PdfReader
 
-from statement_entry import EntryType, StatementsEntry
+from account_check.statement_entry import EntryType, StatementsEntry
 
 ENTRY_DATE = "date"
 ENTRY_AMOUNT = "amount"

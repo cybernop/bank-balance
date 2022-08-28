@@ -2,7 +2,7 @@ from pathlib import Path
 
 import yaml
 
-from account import Account
+from account_check.account import Account
 
 if __name__ == "__main__":
     config = yaml.safe_load(Path("config.yml").read_text())
