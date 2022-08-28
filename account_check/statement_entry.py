@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import date
 from enum import Enum
+from typing import Dict
 
 
 class EntryType(Enum):
@@ -19,8 +20,11 @@ class StatementEntry:
     category: str
 
     def __hash__(self) -> int:
-        return hash(self.amount) + hash(self.date) + hash(self.kind)
+        return hash(frozenset(self.dict().items()))
 
     @property
     def month(self) -> date:
         return date(day=1, month=self.date.month, year=self.date.year)
+
+    def dict(self) -> Dict[str, str]:
+        return {"month": self.month, **asdict(self)}

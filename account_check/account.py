@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List
 
+import pandas as pd
+
 from account_check.bank_statement import Statement
 
 
@@ -18,3 +20,6 @@ class Account:
                     parse=self.config["parse"],
                 )
             )
+
+    def dataframe(self) -> pd.DataFrame:
+        return pd.concat([statement.dataframe() for statement in self.statements])

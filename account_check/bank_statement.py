@@ -2,6 +2,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Dict, List
 
+import pandas as pd
 from PyPDF2 import PdfReader
 
 from account_check.category import Category
@@ -129,6 +130,9 @@ class Statement:
             if entry.target in category_entries:
                 return category
         return None
+
+    def dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame([entry.dict() for entry in self.entries])
 
 
 def _get_cleaned_lines(
