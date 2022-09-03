@@ -5,7 +5,8 @@ from account_check.statement_entry import StatementEntry
 
 
 class Category:
-    def __init__(self, entries: List[StatementEntry] = None) -> None:
+    def __init__(self, name: str, entries: List[StatementEntry] = None) -> None:
+        self.name = name
         self.entries = entries if entries else list()
 
     def append(self, value: StatementEntry) -> None:
@@ -19,4 +20,4 @@ class Category:
         return str(self)
 
     def __str__(self) -> str:
-        return f"total:{self.total}"
+        return f"{self.name}: {self.total}"

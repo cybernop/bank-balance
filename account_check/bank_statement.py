@@ -1,4 +1,5 @@
-from datetime import date, datetime
+import itertools
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
@@ -61,19 +62,37 @@ class Statement:
         for entry in self.entries:
             entry.category = self.get_category(entry)
 
-    def get_categories(self) -> Dict[str, Category]:
-        categories: Dict[str, Category] = {}
+    def get_categories(self) -> List[Category]:
+        result = self._get_categories()
+        return list(itertools.chain.from_iterable(result.values()))
+
+    def _get_categories(self) -> Dict[str, List[Category]]:
+        categories: Dict[str, Dict[str, Category]] = {}
         for entry in self.entries:
+            kind = (
+                EntryType.CREDIT if entry.kind == EntryType.CREDIT else EntryType.DEBIT
+            )
+            if kind not in categories:
+                categories[kind] = {}
+            kind = categories[kind]
             category = entry.category
-            if category not in categories:
-                categories[category] = Category()
-            categories[category].append(entry)
-        return categories
+            if category not in kind:
+                kind[category] = Category(category)
+            kind[category].append(entry)
+        result = {
+            name: list(category_entries.values())
+            for name, category_entries in categories.items()
+        }
+        return result
 
     def get_categories_dataframe(self) -> pd.DataFrame:
         categories = [
-            {"category": name, "total": category.total, "month": self.last.month}
-            for name, category in self.get_categories().items()
+            {
+                "category": category.name,
+                "amount": category.total,
+                "month": self.last.month,
+            }
+            for category in self.get_categories()
         ]
         return pd.DataFrame(categories)
 
