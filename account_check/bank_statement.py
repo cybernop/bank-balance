@@ -105,7 +105,12 @@ class Statement:
 
     def get_category(self, entry: StatementEntry) -> str:
         for category, category_entries in self.category_definitions.items():
-            if entry.target in category_entries:
+            if any(
+                [
+                    cat_entry in entry.target or cat_entry in entry.text
+                    for cat_entry in category_entries
+                ]
+            ):
                 return category
         return "Sonstige"
 
