@@ -25,6 +25,11 @@ class Account:
     def dataframe(self) -> pd.DataFrame:
         return pd.concat([statement.dataframe() for statement in self.statements])
 
+    def categories_dataframe(self) -> pd.DataFrame:
+        return pd.concat(
+            [statement.get_categories_dataframe() for statement in self.statements]
+        )
+
     @property
     def credit(self):
         list_ = []

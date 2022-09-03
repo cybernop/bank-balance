@@ -61,9 +61,21 @@ class Statement:
         for entry in self.entries:
             entry.category = self.get_category(entry)
 
-    @property
-    def categories(self) -> Dict[str, Category]:
-        return Statement.get_categories(self.entries)
+    def get_categories(self) -> Dict[str, Category]:
+        categories: Dict[str, Category] = {}
+        for entry in self.entries:
+            category = entry.category
+            if category not in categories:
+                categories[category] = Category()
+            categories[category].append(entry)
+        return categories
+
+    def get_categories_dataframe(self) -> pd.DataFrame:
+        categories = [
+            {"category": name, "total": category.total, "month": self.last.month}
+            for name, category in self.get_categories().items()
+        ]
+        return pd.DataFrame(categories)
 
     @property
     def debits(self) -> List[StatementEntry]:
@@ -90,18 +102,18 @@ class Statement:
         return self.credit + self.debit
 
     @property
-    def first_date(self) -> date:
-        return min(self.entries, key=lambda x: x.date).date
+    def first(self) -> StatementEntry:
+        return min(self.entries, key=lambda x: x.date)
 
     @property
-    def last_date(self) -> date:
-        return max(self.entries, key=lambda x: x.date).date
+    def last(self) -> StatementEntry:
+        return max(self.entries, key=lambda x: x.date)
 
     def __repr__(self) -> str:
         return str(self)
 
     def __str__(self) -> str:
-        return f"{self.first_date} - {self.last_date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
+        return f"{self.first.date} - {self.last.date}\tin:{self.credit:.2f}\tout:{self.debit:.2f}\tbalance:{self.profit:.2f}"
 
     def get_category(self, entry: StatementEntry) -> str:
         for category, category_entries in self.category_definitions.items():
