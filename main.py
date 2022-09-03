@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 import plotly.express as px
@@ -11,14 +12,16 @@ if __name__ == "__main__":
     account = Account(config=config)
     account.read_statements(config["statement_dir"])
 
-    data = account.debit.dataframe()
+    data = account.dataframe()
+    first_date = date(day=1, month=7, year=2022)
+    data = data[data["month"] >= first_date]
 
     fig = px.bar(
         data,
         x="month",
         y="amount",
         color="category",
-        hover_name="target",
+        hover_name="description",
     )
     fig.show()
     input("any key to close...")

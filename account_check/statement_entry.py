@@ -29,7 +29,11 @@ class StatementEntry:
         return date(day=1, month=self.date.month, year=self.date.year)
 
     def dict(self) -> Dict[str, str]:
-        return {"month": self.month, **asdict(self)}
+        return {"month": self.month, "description": self.description, **asdict(self)}
 
     def dataframe(self) -> pd.DataFrame:
         return pd.DataFrame([self.dict()])
+
+    @property
+    def description(self) -> str:
+        return f"{self.target}: {self.text}"
