@@ -33,6 +33,7 @@ def get_categories(account: Account, not_before: date = None) -> po.Figure:
         y="amount",
         color="category",
         hover_name="category",
+        hover_data=["percent"],
     )
 
     return figure
@@ -50,6 +51,7 @@ def get_details(account: Account, not_before: date = None) -> po.Figure:
         y="amount",
         color="category",
         hover_name="description",
+        hover_data=["date"],
     )
 
     return figure

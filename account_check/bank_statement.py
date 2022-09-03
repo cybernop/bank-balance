@@ -64,6 +64,20 @@ class Statement:
 
     def get_categories(self) -> List[Category]:
         result = self._get_categories()
+
+        # Calculate sums
+        totals = {}
+        for kind, categories in result.items():
+            sum = 0
+            for category in categories:
+                sum += category.amount
+            totals[kind] = sum
+
+        # Set totals in categories
+        for kind, categories in result.items():
+            for category in categories:
+                category.relative_total = totals[kind]
+
         return list(itertools.chain.from_iterable(result.values()))
 
     def _get_categories(self) -> Dict[str, List[Category]]:
@@ -89,8 +103,9 @@ class Statement:
         categories = [
             {
                 "category": category.name,
-                "amount": category.total,
+                "amount": category.amount,
                 "month": self.last.month,
+                "percent": f"{category.relative:.2%}",
             }
             for category in self.get_categories()
         ]
