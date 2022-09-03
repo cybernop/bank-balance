@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as po
 import yaml
+from dash import Dash, Input, Output, dcc, html
 
 from account_check.account import Account
 
@@ -29,7 +30,7 @@ def get_categories(account: Account, not_before: date = None) -> po.Figure:
     figure = px.bar(
         data,
         x="month",
-        y="total",
+        y="amount",
         color="category",
         hover_name="category",
     )
@@ -58,6 +59,32 @@ def filter_data(df: pd.DataFrame, not_before: date) -> pd.DataFrame:
     return df[df["month"] >= not_before]
 
 
+def build_app(figures: Dict[str, po.Figure]) -> Dash:
+    app = Dash("Account Check")
+
+    app.layout = html.Div(
+        [
+            html.H4("Account Check"),
+            html.P("Select display type:"),
+            dcc.Dropdown(
+                id="dropdown",
+                options=["Categories", "Details"],
+                value="Categories",
+                clearable=False,
+            ),
+            dcc.Graph(id="graph"),
+        ]
+    )
+
+    @app.callback(Output("graph", "figure"), Input("dropdown", "value"))
+    def display_graph(type_):
+        fig = figures[type_]
+        fig.update_layout(height=1000)
+        return fig
+
+    return app
+
+
 def main():
     config = get_config()
     account = create_account(config)
@@ -68,8 +95,9 @@ def main():
         "Details": get_details(account, not_before),
     }
 
-    figures["Details"].show()
-    input("any key to close...")
+    app = build_app(figures)
+
+    app.run_server(debug=True)
 
 
 if __name__ == "__main__":
